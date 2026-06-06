@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>التلاوة - تفريغ القرآن من ملفات MP3</title>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cairo', 'Amiri', sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255,215,0,0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(255,215,0,0.03) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 30px 0;
+            position: relative;
+        }
+
+        .header::after {
+            content: '';
+            display: block;
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #c9a84c, transparent);
+            margin: 15px auto;
+        }
+
+        .header h1 {
+            font-family: 'Amiri', serif;
+            font-size: 2.5em;
+            color: #c9a84c;
+            text-shadow: 0 0 20px rgba(201,168,76,0.3);
+            margin-bottom: 5px;
+        }
+
+        .header .subtitle {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.9em;
+            letter-spacing: 1px;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            padding: 15px;
+            margin: 10px 0;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #666;
+            transition: all 0.3s;
+        }
+
+        .status-indicator.active {
+            background: #4CAF50;
+            box-shadow: 0 0 20px rgba(76,175,80,0.5);
+        }
+
+        .status-indicator.processing {
+            background: #FF9800;
+            box-shadow: 0 0 20px rgba(255,152,0,0.5);
+            animation: pulse 0.8s infinite;
+        }
+
+        .status-indicator.error {
+            background: #f44336;
+            box-shadow: 0 0 20px rgba(244,67,54,0.5);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.8); opacity: 0.8; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(0.8); opacity: 0.8; }
+        }
+
+        .status-text {
+            font-size: 0.95em;
+            color: rgba(255,255,255,0.8);
+        }
+
+        /* Upload Area */
+        .upload-area {
+            position: relative;
+            border: 2px dashed rgba(201,168,76,0.3);
+            border-radius: 20px;
+            padding: 50px 30px;
+            margin: 20px 0;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .upload-area:hover {
+            border-color: #c9a84c;
+            background: rgba(201,168,76,0.05);
+        }
+
+        .upload-area.dragover {
+            border-color: #c9a84c;
+            background: rgba(201,168,76,0.1);
+            transform: scale(1.02);
+        }
+
+        .upload-area .upload-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .upload-area .upload-text {
+            font-size: 1.2em;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 10px;
+        }
+
+        .upload-area .upload-hint {
+            font-size: 0.85em;
+            color: rgba(255,255,255,0.4);
+        }
+
+        .upload-area input[type="file"] {
+            display: none;
+        }
+
+        .upload-area .file-name {
+            display: none;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: rgba(201,168,76,0.1);
+            border-radius: 10px;
+            color: #c9a84c;
+            font-size: 1em;
+        }
+
+        .upload-area.has-file .file-name {
+            display: inline-block;
+        }
+
+        .upload-area.has-file .upload-text,
+        .upload-area.has-file .upload-hint {
+            display: none;
+        }
+
+        /* Progress Section */
+        .progress-section {
+            display: none;
+            margin: 15px 0;
+        }
+
+        .progress-section.active {
+            display: block;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #c9a84c, #FFD700);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 0.9em;
+            color: rgba(255,255,255,0.6);
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            padding: 10px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            font-family: 'Cairo', sans-serif;
+            padding: 14px 35px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #c9a84c, #b8942e);
+            color: white;
+            box-shadow: 0 4px 15px rgba(201,168,76,0.3);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 25px rgba(201,168,76,0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:disabled {
+            background: #666;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.8);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .btn-icon {
+            font-size: 1.2em;
+        }
+
+        /* Word Display Area */
+        .result-section {
+            display: none;
+            margin: 20px 0;
+            flex: 1;
+        }
+
+        .result-section.active {
+            display: block;
+        }
+
+        .dictation-area {
+            background: rgba(0,0,0,0.3);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 15px 0;
+            border: 1px solid rgba(201,168,76,0.2);
+            position: relative;
+            overflow: hidden;
+            min-height: 300px;
+        }
+
+        .dictation-area::before {
+            content: '﴿';
+            font-family: 'Amiri', serif;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 2em;
+            color: rgba(201,168,76,0.1);
+        }
+
+        .dictation-area::after {
+            content: '﴾';
+            font-family: 'Amiri', serif;
+            position: absolute;
+            bottom: 10px;
+            left: 20px;
+            font-size: 2em;
+            color: rgba(201,168,76,0.1);
+        }
+
+        .words-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+            padding: 20px;
+        }
+
+        .word {
+            font-family: 'Amiri', serif;
+            font-size: 1.8em;
+            padding: 5px 10px;
+            background: rgba(201,168,76,0.1);
+            border-radius: 8px;
+            opacity: 0;
+            transform: translateY(20px) scale(0.8);
+            animation: wordAppear 0.5s ease-out forwards;
+            transition: all 0.3s;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .word:hover {
+            background: rgba(201,168,76,0.2);
+            transform: scale(1.05);
+        }
+
+        .word.highlight {
+            color: #c9a84c;
+            background: rgba(201,168,76,0.15);
+            box-shadow: 0 0 15px rgba(201,168,76,0.2);
+        }
+
+        .word:nth-child(1) { animation-delay: 0.0s; }
+        .word:nth-child(2) { animation-delay: 0.05s; }
+        .word:nth-child(3) { animation-delay: 0.1s; }
+        .word:nth-child(4) { animation-delay: 0.15s; }
+        .word:nth-child(5) { animation-delay: 0.2s; }
+        .word:nth-child(6) { animation-delay: 0.25s; }
+        .word:nth-child(7) { animation-delay: 0.3s; }
+        .word:nth-child(8) { animation-delay: 0.35s; }
+        .word:nth-child(9) { animation-delay: 0.4s; }
+        .word:nth-child(10) { animation-delay: 0.45s; }
+        .word:nth-child(11) { animation-delay: 0.5s; }
+        .word:nth-child(12) { animation-delay: 0.55s; }
+        .word:nth-child(13) { animation-delay: 0.6s; }
+        .word:nth-child(14) { animation-delay: 0.65s; }
+        .word:nth-child(15) { animation-delay: 0.7s; }
+        .word:nth-child(16) { animation-delay: 0.75s; }
+        .word:nth-child(17) { animation-delay: 0.8s; }
+        .word:nth-child(18) { animation-delay: 0.85s; }
+        .word:nth-child(19) { animation-delay: 0.9s; }
+        .word:nth-child(20) { animation-delay: 0.95s; }
+
+        @keyframes wordAppear {
+            0% {
+                opacity: 0;
+                transform: translateY(20px) scale(0.8);
+            }
+            60% {
+                transform: translateY(-5px) scale(1.05);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Full Text Display */
+        .full-text-area {
+            background: rgba(0,0,0,0.2);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 10px 0;
+            border: 1px solid rgba(255,255,255,0.05);
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .full-text-area .label {
+            font-size: 0.8em;
+            color: rgba(255,255,255,0.4);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .full-text {
+            font-family: 'Amiri', serif;
+            font-size: 1.3em;
+            line-height: 2;
+            color: rgba(255,255,255,0.7);
+            direction: rtl;
+        }
+
+        /* Stats */
+        .stats {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            padding: 15px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-item .stat-value {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #c9a84c;
+        }
+
+        .stat-item .stat-label {
+            font-size: 0.8em;
+            color: rgba(255,255,255,0.5);
+        }
+
+        /* Segment display */
+        .segment {
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            border-right: 3px solid rgba(201,168,76,0.3);
+        }
+
+        .segment .segment-text {
+            font-family: 'Amiri', serif;
+            font-size: 1.1em;
+            line-height: 1.8;
+        }
+
+        .segment .segment-time {
+            font-size: 0.75em;
+            color: rgba(255,255,255,0.3);
+            margin-top: 4px;
+        }
+
+        /* Placeholder */
+        .placeholder-text {
+            color: rgba(255,255,255,0.2);
+            font-size: 1.2em;
+            text-align: center;
+            width: 100%;
+        }
+
+        /* Duration display */
+        .duration-info {
+            display: none;
+            text-align: center;
+            padding: 10px;
+            color: rgba(255,255,255,0.5);
+            font-size: 0.9em;
+        }
+
+        .duration-info.active {
+            display: block;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(201,168,76,0.3);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(201,168,76,0.5);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .word {
+                font-size: 1.3em;
+            }
+            
+            .dictation-area {
+                padding: 20px;
+            }
+            
+            .btn {
+                padding: 12px 25px;
+                font-size: 0.9em;
+            }
+
+            .upload-area {
+                padding: 30px 20px;
+            }
+
+            .upload-area .upload-icon {
+                font-size: 3em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .word {
+                font-size: 1.1em;
+                padding: 3px 8px;
+            }
+            
+            .controls {
+                gap: 10px;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.85em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📖 التلاوة</h1>
+            <div class="subtitle">تفريغ القرآن الكريم من ملفات MP3</div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-indicator" id="statusIndicator"></div>
+            <span class="status-text" id="statusText">🕌 ارفع ملفاً للبدء</span>
+            <span class="status-text" style="opacity:0.5;font-size:0.85em;" id="modelStatus">جارٍ تحميل النموذج...</span>
+        </div>
+
+        <!-- Upload Area -->
+        <div class="upload-area" id="uploadArea">
+            <span class="upload-icon">🎤</span>
+            <div class="upload-text">اختر ملفاً صوتياً أو اسحبه وأفلته هنا</div>
+            <div class="upload-hint">يدعم: MP3, WAV, M4A, OGG, FLAC, AAC - حد أقصى 100MB</div>
+            <div class="file-name" id="fileName"></div>
+            <input type="file" id="fileInput" accept=".mp3,.wav,.m4a,.ogg,.flac,.aac">
+        </div>
+
+        <!-- Progress Section -->
+        <div class="progress-section" id="progressSection">
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="progress-text" id="progressText">⏳ جارٍ المعالجة...</div>
+        </div>
+
+        <!-- Duration Info -->
+        <div class="duration-info" id="durationInfo">
+            <span id="durationText"></span>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls" id="controlsSection" style="display:none;">
+            <button class="btn btn-primary" id="newFileBtn" onclick="resetForNewFile()">
+                <span class="btn-icon">📂</span>
+                ملف جديد
+            </button>
+            <button class="btn btn-secondary" onclick="copyFullText()">
+                <span class="btn-icon">📋</span>
+                نسخ النص
+            </button>
+        </div>
+
+        <!-- Result Section -->
+        <div class="result-section" id="resultSection">
+            <!-- Stats -->
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="wordCount">0</div>
+                    <div class="stat-label">كلمة</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="charCount">0</div>
+                    <div class="stat-label">حرف</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="durationStat">00:00</div>
+                    <div class="stat-label">المدة</div>
+                </div>
+            </div>
+
+            <!-- Word Display -->
+            <div class="dictation-area">
+                <div class="words-container" id="wordsContainer">
+                    <div class="placeholder-text" id="placeholder">
+                        🎵 الكلمات ستظهر هنا بعد المعالجة...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Full Text -->
+            <div class="full-text-area" id="fullTextArea" style="display:none;">
+                <div class="label">النص الكامل</div>
+                <div class="full-text" id="fullText"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // Socket.io Connection
+        // ============================================================
+        const socket = io('http://localhost:5000');
+        
+        // DOM Elements
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+        const progressSection = document.getElementById('progressSection');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const resultSection = document.getElementById('resultSection');
+        const wordsContainer = document.getElementById('wordsContainer');
+        const placeholder = document.getElementById('placeholder');
+        const fullTextArea = document.getElementById('fullTextArea');
+        const fullTextElement = document.getElementById('fullText');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const statusText = document.getElementById('statusText');
+        const modelStatus = document.getElementById('modelStatus');
+        const wordCountElement = document.getElementById('wordCount');
+        const charCountElement = document.getElementById('charCount');
+        const durationStat = document.getElementById('durationStat');
+        const durationInfo = document.getElementById('durationInfo');
+        const durationText = document.getElementById('durationText');
+        const controlsSection = document.getElementById('controlsSection');
+
+        // State
+        let currentTaskId = null;
+        let allWords = [];
+
+        // ============================================================
+        // Socket Events
+        // ============================================================
+        socket.on('connect', () => {
+            setStatus('active', '✅ متصل بالخادم');
+            updateModelStatus('متصل');
+        });
+
+        socket.on('disconnect', () => {
+            setStatus('error', '❌ تم قطع الاتصال');
+            updateModelStatus('غير متصل');
+        });
+
+        socket.on('status', (data) => {
+            updateModelStatus(`✅ ${data.model || 'النموذج جاهز'}`);
+        });
+
+        socket.on('task_update', (data) => {
+            if (data.progress !== undefined) {
+                progressBar.style.width = `${data.progress}%`;
+            }
+            if (data.message) {
+                progressText.textContent = data.message;
+            }
+            if (data.status === 'processing') {
+                setStatus('processing', '⏳ جارٍ المعالجة...');
+            }
+            if (data.status === 'error') {
+                setStatus('error', data.message || '❌ حدث خطأ');
+                progressSection.classList.remove('active');
+            }
+        });
+
+        socket.on('task_complete', (data) => {
+            // Hide progress
+            progressSection.classList.remove('active');
+            
+            // Show result
+            displayResult(data);
+            
+            setStatus('active', '✅ اكتملت المعالجة');
+        });
+
+        // ============================================================
+        // Upload Handling
+        // ============================================================
+        // Click to upload
+        uploadArea.addEventListener('click', () => {
+            if (!currentTaskId) {
+                fileInput.click();
+            }
+        });
+
+        // File selected
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            if (e.dataTransfer.files.length > 0) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        // ============================================================
+        // File Handling
+        // ============================================================
+        function handleFile(file) {
+            // Validate file type
+            const validExtensions = ['.mp3', '.wav', '.m4a', '.ogg', '.flac', '.aac'];
+            const ext = '.' + file.name.split('.').pop().toLowerCase();
+            
+            if (!validExtensions.includes(ext)) {
+                setStatus('error', '⚠️ صيغة الملف غير مدعومة');
+                return;
+            }
+
+            // Validate file size (100MB)
+            if (file.size > 100 * 1024 * 1024) {
+                setStatus('error', '⚠️ حجم الملف يتجاوز 100MB');
+                return;
+            }
+
+            // Show file name
+            fileName.textContent = `📄 ${file.name}`;
+            uploadArea.classList.add('has-file');
+            
+            // Upload file
+            uploadFile(file);
+        }
+
+        function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            setStatus('processing', '📤 جارٍ رفع الملف...');
+            progressSection.classList.add('active');
+            progressBar.style.width = '5%';
+            progressText.textContent = '📤 جارٍ رفع الملف...';
+
+            fetch('/api/upload', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.task_id) {
+                    currentTaskId = data.task_id;
+                    setStatus('processing', '✅ تم الرفع. جارٍ المعالجة...');
+                    progressBar.style.width = '10%';
+                    progressText.textContent = '✅ تم رفع الملف. جارٍ المعالجة...';
+                } else if (data.error) {
+                    setStatus('error', `⚠️ ${data.error}`);
+                    progressSection.classList.remove('active');
+                }
+            })
+            .catch(err => {
+                setStatus('error', '⚠️ فشل رفع الملف');
+                progressSection.classList.remove('active');
+                console.error('Upload error:', err);
+            });
+        }
+
+        // ============================================================
+        // Display Results
+        // ============================================================
+        function displayResult(data) {
+            const words = data.words || [];
+            const segments = data.segments || [];
+            const text = data.text || '';
+            
+            allWords = words;
+            
+            // Clear previous
+            wordsContainer.innerHTML = '';
+            
+            // Show result section
+            resultSection.classList.add('active');
+            controlsSection.style.display = 'flex';
+            
+            // Update stats
+            wordCountElement.textContent = data.word_count || words.length;
+            charCountElement.textContent = text.replace(/\s/g, '').length;
+            
+            // Format duration
+            const durationSec = data.duration || 0;
+            const mins = String(Math.floor(durationSec / 60)).padStart(2, '0');
+            const secs = String(Math.floor(durationSec % 60)).padStart(2, '0');
+            durationStat.textContent = `${mins}:${secs}`;
+            durationInfo.classList.add('active');
+            durationText.textContent = `⏱️ المدة: ${mins}:${secs} دقيقة`;
+            
+            // Display words
+            if (words.length === 0) {
+                wordsContainer.innerHTML = '<div class="placeholder-text">⚠️ لم يتم التعرف على أي كلمات</div>';
+                return;
+            }
+
+            // Add segments as visual dividers
+            let wordIndex = 0;
+            
+            // Display all words in a continuous flow
+            words.forEach((wordData, i) => {
+                const wordEl = document.createElement('span');
+                wordEl.className = 'word';
+                wordEl.textContent = wordData.word;
+                wordEl.title = `⏱️ ${formatTime(wordData.start)} - ${formatTime(wordData.end)}`;
+                wordsContainer.appendChild(wordEl);
+            });
+            
+            // Show full text
+            fullTextArea.style.display = 'block';
+            
+            // Build full text with segment structure
+            let fullHtml = '';
+            segments.forEach((seg, i) => {
+                const segTime = `${formatTime(seg.start)} - ${formatTime(seg.end)}`;
+                fullHtml += `<div class="segment">
+                    <div class="segment-text">${seg.text}</div>
+                    <div class="segment-time">${segTime}</div>
+                </div>`;
+            });
+            fullTextElement.innerHTML = fullHtml;
+            
+            // Scroll first word into view
+            const firstWord = wordsContainer.querySelector('.word');
+            if (firstWord) {
+                firstWord.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            // Update upload area state
+            uploadArea.style.pointerEvents = 'none';
+            uploadArea.style.opacity = '0.5';
+        }
+
+        // ============================================================
+        // Utility Functions
+        // ============================================================
+        function formatTime(seconds) {
+            const mins = String(Math.floor(seconds / 60)).padStart(2, '0');
+            const secs = String(Math.floor(seconds % 60)).padStart(2, '0');
+            return `${mins}:${secs}`;
+        }
+
+        function copyFullText() {
+            const segments = allWords.map(w => w.word).join(' ');
+            if (segments) {
+                navigator.clipboard.writeText(segments)
+                    .then(() => {
+                        setStatus('active', '📋 تم نسخ النص');
+                        setTimeout(() => {
+                            setStatus('active', '✅ اكتملت المعالجة');
+                        }, 2000);
+                    })
+                    .catch(() => {
+                        setStatus('error', '⚠️ فشل النسخ');
+                    });
+            }
+        }
+
+        function resetForNewFile() {
+            // Reset state
+            currentTaskId = null;
+            allWords = [];
+            
+            // Reset UI
+            resultSection.classList.remove('active');
+            controlsSection.style.display = 'none';
+            progressSection.classList.remove('active');
+            progressBar.style.width = '0%';
+            
+            // Reset upload area
+            uploadArea.style.pointerEvents = 'auto';
+            uploadArea.style.opacity = '1';
+            uploadArea.classList.remove('has-file');
+            fileName.textContent = '';
+            fileInput.value = '';
+            
+            // Clear results
+            wordsContainer.innerHTML = '<div class="placeholder-text">🎵 الكلمات ستظهر هنا بعد المعالجة...</div>';
+            fullTextElement.innerHTML = '';
+            fullTextArea.style.display = 'none';
+            durationInfo.classList.remove('active');
+            
+            // Reset stats
+            wordCountElement.textContent = '0';
+            charCountElement.textContent = '0';
+            durationStat.textContent = '00:00';
+            
+            setStatus('active', '🕌 ارفع ملفاً جديداً');
+        }
+
+        function setStatus(state, text) {
+            statusIndicator.className = 'status-indicator';
+            if (state === 'active') {
+                statusIndicator.classList.add('active');
+            } else if (state === 'processing') {
+                statusIndicator.classList.add('processing');
+            } else if (state === 'error') {
+                statusIndicator.classList.add('error');
+            } else {
+                statusIndicator.style.background = '#666';
+            }
+            statusText.textContent = text;
+        }
+
+        function updateModelStatus(text) {
+            modelStatus.textContent = text;
+        }
+
+        // Check server status on load
+        fetch('/api/status')
+            .then(res => res.json())
+            .then(data => {
+                if (data.model) {
+                    updateModelStatus(`✅ ${data.model}`);
+                }
+            })
+            .catch(err => {
+                updateModelStatus('⚠️ لا يمكن الاتصال بالخادم');
+            });
+    </script>
+</body>
+</html>
