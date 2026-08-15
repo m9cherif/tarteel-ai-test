@@ -32,13 +32,19 @@ Search `to add` and `Slot` in `index.html` to find every one of them.
 
 ## Design notes
 
-- **Ledger layout** — hairline rules and a monospace left rail, echoing the
-  query results and spreadsheets the work actually happens in.
-- **Two accents that mean something** — teal marks data and technical
-  capabilities, oxblood marks commercial ones.
+- **Matcha palette** — a tonal green built around `#5F8340`, on a rice-paper
+  ground with a green bias. A muted indigo appears exactly once, on the
+  `Learning` tag, so the one thing that differs is the one thing that stands out.
+- **Sticky index rail** — tracks the section you're reading and draws a short
+  whisk-stroke under its number. Collapses to a numbered strip under 860px.
+- **Reactive detail**: a canvas wash of slow matcha blooms that drift toward the
+  cursor, a "steeping" scroll-progress bar, rows that steep green on hover,
+  scroll-triggered reveals, and a theme toggle that persists.
 - **Skill levels are labels, not invented percentages.** Everything reads
   `Core` except AI engineering, which reads `Learning`.
 - **Light and dark** are both defined at token level, including the default
-  "system" state where no theme attribute is set.
+  "system" state where no theme attribute is set. The canvas measures the
+  resolved ground colour and repaints, so the wash never fights its background.
 - Fonts are system stacks, so nothing is fetched at load and nothing silently
   falls back to a different face.
+- Every animation is disabled under `prefers-reduced-motion`.
