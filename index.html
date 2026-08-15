@@ -378,6 +378,53 @@ h2 {
    ============================================================ */
 .slots { display: grid; gap: 14px; }
 
+/* A filled project — solid and rule-marked where an empty slot is dashed. */
+.filled {
+  border: 1px solid var(--rule-strong);
+  border-left: 2px solid var(--matcha);
+  border-radius: 3px;
+  padding: clamp(22px, 3vw, 30px);
+  transition: border-color .35s ease, transform .35s cubic-bezier(.22,.61,.36,1);
+}
+.filled:hover { border-color: var(--sakura); transform: translateX(5px); }
+
+.filled h3 {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 1.35rem;
+  letter-spacing: -.02em;
+  margin: 0 0 .6em;
+  color: var(--ink);
+}
+
+.filled-line {
+  margin: 0 0 .9em;
+  font-size: .97rem;
+  line-height: 1.62;
+  color: var(--ink-soft);
+  max-width: var(--measure);
+}
+.filled-line em { font-style: italic; color: var(--sakura-ink); }
+
+.filled-meta {
+  margin: 0 0 1em;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .1em;
+  color: var(--ink-faint);
+}
+
+.filled-link {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: .08em;
+  color: var(--matcha-deep);
+  border-bottom: 1px solid var(--rule-strong);
+  padding-bottom: 2px;
+  transition: color .25s ease, border-color .25s ease;
+}
+.filled-link:hover { color: var(--sakura-ink); border-color: var(--sakura); }
+
 .slot {
   border: 1px dashed var(--rule-strong);
   border-radius: 3px;
@@ -648,13 +695,32 @@ footer {
       <div class="rise">
         <h2>Selected work</h2>
         <div class="prose" style="margin-bottom: 26px;">
-          <p>Three projects, each one a question and what it changed.</p>
+          <p>Each project is a question someone needed answered, and what changed as a result.</p>
         </div>
         <div class="slots">
-          <article class="slot">
-            <h3>Project one</h3>
-            <p>The question someone needed answered, what you built to answer it, and what they did differently afterwards.</p>
-            <span class="slot-hint">Slot — to fill</span>
+          <article class="filled">
+            <h3>Territory &amp; Pipeline Forecaster</h3>
+            <p class="filled-line">
+              Sales leaders were being handed a single number for the quarter — precise,
+              confident, and wrong. I built a forecaster that answers the question they
+              were actually asking: <em>are we going to make it?</em>
+            </p>
+            <p class="filled-line">
+              A calibrated model scores every open deal, a Monte Carlo simulation turns
+              those into a distribution of quarter-end bookings, and a walk-forward
+              backtest reports how wrong it has been before — 19% median error, with 83%
+              of quarters landing inside its stated 80% band. It also says where next
+              quarter's selling hours are worth most, which turned out to be a smaller
+              lever than expected: the concentration sits in a handful of coin-flip
+              deals, not in how territories are covered.
+            </p>
+            <p class="filled-meta">Python · scikit-learn · Streamlit · Claude</p>
+            <!-- Points at the source on GitHub: a folder of Markdown has no index page,
+     so a relative link would 404 on GitHub Pages. GitHub redirects this URL
+     automatically if the repository is renamed. -->
+            <a class="filled-link"
+               href="https://github.com/m9cherif/tarteel-ai-test/tree/main/pipeline-forecaster"
+               target="_blank" rel="noopener">Read how it works &rarr;</a>
           </article>
           <article class="slot">
             <h3>Project two</h3>

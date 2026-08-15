@@ -1,0 +1,12 @@
+numpy>=1.26
+pandas>=2.2
+scikit-learn>=1.4
+streamlit>=1.35
+altair>=5.3
+
+# Optional. The executive brief is written by Claude when this is installed and
+# ANTHROPIC_API_KEY is set; without it the app uses a built-in writer instead.
+anthropic>=0.40
+
+# Dev
+pytest>=8.0
