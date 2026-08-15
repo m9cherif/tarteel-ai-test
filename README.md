@@ -1,1 +1,0 @@
-# tarteel-ai-test
