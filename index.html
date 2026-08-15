@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tasnim Cherif</title>
+<meta name="description" content="Tasnim Cherif — business data analyst working between the business question and the data that answers it.">
+<style>
+/* ============================================================
+   Tokens — light is the base; dark redefines tokens only.
+   ============================================================ */
+:root {
+  --ground:      #F4F1F0;
+  --surface:     #FBFAF9;
+  --ink:         #1B1719;
+  --ink-soft:    #635A5D;
+  --ink-faint:   #948A8D;
+  --rule:        #DBD3D1;
+  --rule-strong: #C4B9B7;
+  --business:    #8C2F39;
+  --data:        #2F6F6B;
+  --focus:       #8C2F39;
+
+  --display: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --body: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --label: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --rail: 190px;
+  --gutter: 40px;
+  --measure: 62ch;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground:      #141113;
+    --surface:     #1C1819;
+    --ink:         #EDE8E7;
+    --ink-soft:    #A79C9F;
+    --ink-faint:   #776D70;
+    --rule:        #2E2829;
+    --rule-strong: #443B3D;
+    --business:    #D4808A;
+    --data:        #6FB3AD;
+    --focus:       #D4808A;
+  }
+}
+
+:root[data-theme="dark"] {
+  --ground:      #141113;
+  --surface:     #1C1819;
+  --ink:         #EDE8E7;
+  --ink-soft:    #A79C9F;
+  --ink-faint:   #776D70;
+  --rule:        #2E2829;
+  --rule-strong: #443B3D;
+  --business:    #D4808A;
+  --data:        #6FB3AD;
+  --focus:       #D4808A;
+}
+
+/* ============================================================
+   Base
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 17px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid var(--rule-strong);
+  transition: border-color .18s ease, color .18s ease;
+}
+
+a:hover { color: var(--business); border-bottom-color: var(--business); }
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+  border-radius: 1px;
+}
+
+.skip {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--surface);
+  color: var(--ink);
+  padding: 12px 18px;
+  font-family: var(--label);
+  font-size: 13px;
+  z-index: 10;
+  border: 1px solid var(--rule-strong);
+}
+.skip:focus { left: 12px; top: 12px; }
+
+/* ============================================================
+   Ledger frame
+   ============================================================ */
+.sheet {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 5vw, 56px);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: var(--rail) 1fr;
+  gap: 0 var(--gutter);
+  border-top: 1px solid var(--rule);
+  padding: clamp(40px, 6vw, 76px) 0;
+}
+
+.row:first-of-type { border-top: none; }
+
+/* Left rail: mono index label */
+.rail {
+  font-family: var(--display);
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  padding-top: .55em;
+}
+
+.rail b {
+  display: block;
+  font-weight: 400;
+  color: var(--data);
+}
+
+.col { min-width: 0; }
+
+/* ============================================================
+   Masthead
+   ============================================================ */
+.masthead {
+  padding: clamp(64px, 13vh, 132px) 0 clamp(44px, 8vw, 84px);
+}
+
+.eyebrow {
+  font-family: var(--label);
+  font-size: 12px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin: 0 0 clamp(24px, 4vw, 40px);
+}
+
+.name {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: clamp(2.4rem, 8.2vw, 5.4rem);
+  line-height: 1;
+  letter-spacing: -.045em;
+  margin: 0;
+  text-wrap: balance;
+}
+
+.name .surname { color: var(--ink-soft); }
+
+.thesis {
+  font-size: clamp(1.12rem, 2.4vw, 1.5rem);
+  line-height: 1.45;
+  max-width: 28ch;
+  margin: clamp(26px, 4vw, 40px) 0 0;
+  text-wrap: balance;
+}
+
+.thesis em {
+  font-style: normal;
+  color: var(--data);
+}
+
+.thesis strong {
+  font-weight: inherit;
+  color: var(--business);
+}
+
+.masthead-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 28px;
+  margin-top: clamp(30px, 5vw, 46px);
+  font-family: var(--display);
+  font-size: 12px;
+  letter-spacing: .06em;
+  color: var(--ink-soft);
+}
+
+/* ============================================================
+   Type inside rows
+   ============================================================ */
+h2 {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: clamp(1.3rem, 3vw, 1.75rem);
+  letter-spacing: -.03em;
+  margin: 0 0 1.2em;
+  text-wrap: balance;
+}
+
+.prose { max-width: var(--measure); }
+.prose p { margin: 0 0 1.05em; }
+.prose p:last-child { margin-bottom: 0; }
+
+/* ============================================================
+   Capabilities table
+   ============================================================ */
+.group + .group { margin-top: clamp(30px, 4vw, 44px); }
+
+.group-name {
+  font-family: var(--label);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--rule);
+  margin: 0 0 4px;
+}
+
+.skill {
+  display: grid;
+  grid-template-columns: minmax(0, 15em) minmax(0, 1fr) auto;
+  gap: 4px 24px;
+  align-items: baseline;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.skill-name {
+  font-family: var(--display);
+  font-size: .95rem;
+  letter-spacing: -.02em;
+}
+
+.skill-note {
+  font-size: .95rem;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.tag {
+  font-family: var(--label);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  padding: 3px 9px;
+  border: 1px solid currentColor;
+  color: var(--ink-faint);
+}
+
+.tag.is-data     { color: var(--data); }
+.tag.is-business { color: var(--business); }
+
+/* ============================================================
+   Work slots — visibly unfilled, by design
+   ============================================================ */
+.slot {
+  border: 1px dashed var(--rule-strong);
+  padding: clamp(20px, 3vw, 28px);
+  color: var(--ink-faint);
+}
+
+.slot + .slot { margin-top: 16px; }
+
+.slot h3 {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 1rem;
+  letter-spacing: -.02em;
+  margin: 0 0 .5em;
+  color: var(--ink-soft);
+}
+
+.slot p { margin: 0; font-size: .95rem; line-height: 1.55; }
+
+.slot-hint {
+  display: block;
+  margin-top: .9em;
+  font-family: var(--label);
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   Contact
+   ============================================================ */
+.contact-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+  max-width: 34em;
+}
+
+.contact-list li {
+  display: grid;
+  grid-template-columns: 8em 1fr;
+  gap: 16px;
+  align-items: baseline;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--display);
+  font-size: .93rem;
+}
+
+.contact-list dfn {
+  font-family: var(--label);
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.unset { color: var(--ink-faint); border-bottom-style: dashed; }
+
+footer {
+  border-top: 1px solid var(--rule);
+  padding: 28px 0 44px;
+  font-family: var(--display);
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  justify-content: space-between;
+}
+
+/* ============================================================
+   Load sequence — one orchestrated reveal, nothing scattered
+   ============================================================ */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.masthead > *, .row {
+  animation: rise .62s cubic-bezier(.22, .61, .36, 1) backwards;
+}
+.masthead > *:nth-child(1) { animation-delay: .04s; }
+.masthead > *:nth-child(2) { animation-delay: .11s; }
+.masthead > *:nth-child(3) { animation-delay: .18s; }
+.masthead > *:nth-child(4) { animation-delay: .25s; }
+.row:nth-of-type(1) { animation-delay: .30s; }
+.row:nth-of-type(2) { animation-delay: .35s; }
+.row:nth-of-type(3) { animation-delay: .40s; }
+.row:nth-of-type(4) { animation-delay: .45s; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: .001ms !important;
+  }
+}
+
+/* ============================================================
+   Narrow screens — the rail folds above its row
+   ============================================================ */
+@media (max-width: 720px) {
+  .row {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .rail { padding-top: 0; }
+  .rail b { display: inline; margin-left: .8em; }
+  .skill {
+    grid-template-columns: 1fr auto;
+    gap: 6px 16px;
+  }
+  .skill-note { grid-column: 1 / -1; }
+  .contact-list li { grid-template-columns: 1fr; gap: 4px; }
+}
+</style>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<div class="sheet">
+
+  <header class="masthead">
+    <p class="eyebrow">Business Data Analyst</p>
+    <h1 class="name">Tasnim <span class="surname">Cherif</span></h1>
+    <p class="thesis">
+      I work between the <strong>business question</strong> and the
+      <em>data that answers it</em> — and I'm comfortable on both sides.
+    </p>
+    <div class="masthead-meta">
+      <span>Available for work</span>
+      <span class="unset">Location &mdash; to add</span>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- ---------------------------------------------------------------
+         PROFILE — rewrite this in your own voice. It currently describes
+         an approach, not a history, since your background isn't filled in.
+    ---------------------------------------------------------------- -->
+    <section class="row">
+      <div class="rail">Profile <b>01</b></div>
+      <div class="col prose">
+        <h2>What I do</h2>
+        <p>
+          Most analysis fails long before the model does — it fails when nobody
+          agreed on the question. I start there: what decision is waiting on this
+          number, and who has to act on it.
+        </p>
+        <p>
+          From there it's the ordinary craft. Get the data out of the database,
+          make it trustworthy, and put it somewhere a decision-maker will actually
+          look — a Power BI dashboard, a clean Excel model, a Python notebook when
+          the question needs more than a pivot table.
+        </p>
+        <p>
+          The commercial side isn't a separate skill for me. Having worked in
+          business development and sales, I know what it's like to be the person
+          the report is written for.
+        </p>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------------------
+         CAPABILITIES — the notes describe what each tool is for. Edit them
+         to describe what YOU have done with it once you have examples.
+    ---------------------------------------------------------------- -->
+    <section class="row">
+      <div class="rail">Capabilities <b>02</b></div>
+      <div class="col">
+        <h2>Capabilities</h2>
+
+        <div class="group">
+          <p class="group-name">Data &amp; Analysis</p>
+          <div class="skill">
+            <span class="skill-name">Databases</span>
+            <span class="skill-note">Querying, joining and shaping source data</span>
+            <span class="tag is-data">Core</span>
+          </div>
+          <div class="skill">
+            <span class="skill-name">Excel</span>
+            <span class="skill-note">Modelling, reconciliation, fast one-off analysis</span>
+            <span class="tag is-data">Core</span>
+          </div>
+          <div class="skill">
+            <span class="skill-name">Power BI</span>
+            <span class="skill-note">Dashboards and reporting people return to</span>
+            <span class="tag is-data">Core</span>
+          </div>
+        </div>
+
+        <div class="group">
+          <p class="group-name">Technical</p>
+          <div class="skill">
+            <span class="skill-name">Python</span>
+            <span class="skill-note">Analysis, cleaning, and automating the repeatable parts</span>
+            <span class="tag is-data">Core</span>
+          </div>
+          <div class="skill">
+            <span class="skill-name">Machine Learning</span>
+            <span class="skill-note">Prediction and segmentation where the data supports it</span>
+            <span class="tag is-data">Core</span>
+          </div>
+          <div class="skill">
+            <span class="skill-name">Web Development</span>
+            <span class="skill-note">Building the interface around the analysis</span>
+            <span class="tag is-data">Core</span>
+          </div>
+          <div class="skill">
+            <span class="skill-name">AI Engineering</span>
+            <span class="skill-note">Working with LLMs and applied AI tooling</span>
+            <span class="tag">Learning</span>
+          </div>
+        </div>
+
+        <div class="group">
+          <p class="group-name">Commercial</p>
+          <div class="skill">
+            <span class="skill-name">Business Development</span>
+            <span class="skill-note">Finding and qualifying where the value actually is</span>
+            <span class="tag is-business">Core</span>
+          </div>
+          <div class="skill">
+            <span class="skill-name">Sales</span>
+            <span class="skill-note">Client conversations, pipeline, and closing</span>
+            <span class="tag is-business">Core</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------------------
+         SELECTED WORK — deliberately left unfilled. Replace each .slot
+         with a real project: what the question was, what you built,
+         what changed as a result. Three is plenty.
+    ---------------------------------------------------------------- -->
+    <section class="row">
+      <div class="rail">Selected work <b>03</b></div>
+      <div class="col">
+        <h2>Selected work</h2>
+        <div class="prose" style="margin-bottom: 24px;">
+          <p>Three projects, each one a question and what it changed.</p>
+        </div>
+
+        <article class="slot">
+          <h3>Project one</h3>
+          <p>The question someone needed answered, what you built to answer it, and what they did differently afterwards.</p>
+          <span class="slot-hint">Slot &mdash; to fill</span>
+        </article>
+
+        <article class="slot">
+          <h3>Project two</h3>
+          <p>Name the tools only where they matter. The result is the interesting part.</p>
+          <span class="slot-hint">Slot &mdash; to fill</span>
+        </article>
+
+        <article class="slot">
+          <h3>Project three</h3>
+          <p>Coursework and personal projects count — say so plainly and they read as honest rather than thin.</p>
+          <span class="slot-hint">Slot &mdash; to fill</span>
+        </article>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------------------
+         CONTACT — fill in the real handles and delete class="unset".
+         Nothing here is a working address yet.
+    ---------------------------------------------------------------- -->
+    <section class="row">
+      <div class="rail">Contact <b>04</b></div>
+      <div class="col">
+        <h2>Get in touch</h2>
+        <ul class="contact-list">
+          <li><dfn>Email</dfn> <span class="unset">to add</span></li>
+          <li><dfn>LinkedIn</dfn> <span class="unset">to add</span></li>
+          <li><dfn>GitHub</dfn> <span class="unset">to add</span></li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <span>Tasnim Cherif</span>
+    <span>Business Data Analyst</span>
+  </footer>
+
+</div>
+
+</body>
+</html>
