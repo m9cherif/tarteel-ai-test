@@ -20,7 +20,9 @@
   --matcha:      #5F8340;
   --matcha-deep: #3D5A2B;
   --matcha-veil: rgba(126, 163, 82, .16);
-  --indigo:      #3F5170;
+  --sakura:      #C97B90;
+  --sakura-deep: #A85B72;
+  --sakura-veil: rgba(226, 141, 162, .34);
   --focus:       #5F8340;
 
   --display: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
@@ -43,7 +45,9 @@
     --matcha:      #9DC275;
     --matcha-deep: #B7D694;
     --matcha-veil: rgba(157, 194, 117, .13);
-    --indigo:      #8B9DC4;
+    --sakura:      #E5A3B4;
+    --sakura-deep: #F0BDC9;
+    --sakura-veil: rgba(229, 163, 180, .20);
     --focus:       #9DC275;
   }
 }
@@ -59,7 +63,9 @@
   --matcha:      #9DC275;
   --matcha-deep: #B7D694;
   --matcha-veil: rgba(157, 194, 117, .13);
-  --indigo:      #8B9DC4;
+  --sakura:      #E5A3B4;
+  --sakura-deep: #F0BDC9;
+  --sakura-veil: rgba(229, 163, 180, .20);
   --focus:       #9DC275;
 }
 
@@ -77,6 +83,15 @@ body {
   font-size: 16.5px;
   line-height: 1.68;
   -webkit-font-smoothing: antialiased;
+}
+
+#petals {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 5;
+  pointer-events: none;
 }
 
 #ambient {
@@ -121,7 +136,7 @@ a { color: inherit; text-decoration: none; }
   width: 100%;
   transform: scaleX(0);
   transform-origin: 0 50%;
-  background: linear-gradient(90deg, var(--matcha-deep), var(--matcha));
+  background: linear-gradient(90deg, var(--matcha-deep), var(--matcha) 62%, var(--sakura));
   z-index: 15;
 }
 
@@ -242,7 +257,7 @@ a { color: inherit; text-decoration: none; }
 .eyebrow::before {
   content: "";
   width: 34px; height: 1px;
-  background: var(--matcha);
+  background: linear-gradient(90deg, var(--sakura), var(--matcha));
   transform-origin: 0 50%;
 }
 
@@ -284,7 +299,10 @@ a { color: inherit; text-decoration: none; }
   margin: 0 -.1em;
 }
 .is-ready .thesis b { background-size: 100% .42em; }
-.thesis b:nth-of-type(2) { transition-delay: .18s; }
+.thesis b.biz {
+  background-image: linear-gradient(to top, var(--sakura-veil), var(--sakura-veil));
+}
+.thesis b + b { transition-delay: .18s; }
 
 .masthead-meta {
   display: flex;
@@ -335,6 +353,8 @@ h2 {
    Capabilities
    ============================================================ */
 .group + .group { margin-top: clamp(30px, 4vw, 46px); }
+
+.group-name.is-biz { color: var(--sakura); }
 
 .group-name {
   font-family: var(--mono);
@@ -397,8 +417,12 @@ h2 {
   border-radius: 999px;
   color: var(--ink-faint);
 }
-.tag.is-core { color: var(--matcha); }
-.tag.is-learning { color: var(--indigo); }
+.tag.is-data { color: var(--matcha); }
+.tag.is-biz  { color: var(--sakura); }
+.tag.is-learning {
+  color: var(--ink-faint);
+  border-style: dashed;
+}
 
 /* ============================================================
    Work slots — visibly unfilled, by design
@@ -545,6 +569,7 @@ footer {
 
 <a class="skip" href="#main">Skip to content</a>
 <canvas id="ambient" aria-hidden="true"></canvas>
+<canvas id="petals" aria-hidden="true"></canvas>
 <div id="steep" aria-hidden="true"></div>
 <button id="theme" type="button" aria-label="Switch between light and dark">◐</button>
 
@@ -561,7 +586,7 @@ footer {
     <p class="eyebrow rise" style="--i:0">Business Data Analyst</p>
     <h1 class="name rise" style="--i:1">Tasnim <span class="surname">Cherif</span></h1>
     <p class="thesis rise" style="--i:2">
-      I work between the <b>business question</b> and the
+      I work between the <b class="biz">business question</b> and the
       <b>data that answers it</b> — and I'm comfortable on both sides.
     </p>
     <div class="masthead-meta rise" style="--i:3">
@@ -613,17 +638,17 @@ footer {
           <div class="skill">
             <span class="skill-name">Databases</span>
             <span class="skill-note">Querying, joining and shaping source data</span>
-            <span class="tag is-core">Core</span>
+            <span class="tag is-data">Core</span>
           </div>
           <div class="skill">
             <span class="skill-name">Excel</span>
             <span class="skill-note">Modelling, reconciliation, fast one-off analysis</span>
-            <span class="tag is-core">Core</span>
+            <span class="tag is-data">Core</span>
           </div>
           <div class="skill">
             <span class="skill-name">Power BI</span>
             <span class="skill-note">Dashboards and reporting people return to</span>
-            <span class="tag is-core">Core</span>
+            <span class="tag is-data">Core</span>
           </div>
         </div>
 
@@ -632,17 +657,17 @@ footer {
           <div class="skill">
             <span class="skill-name">Python</span>
             <span class="skill-note">Analysis, cleaning, and automating the repeatable parts</span>
-            <span class="tag is-core">Core</span>
+            <span class="tag is-data">Core</span>
           </div>
           <div class="skill">
             <span class="skill-name">Machine Learning</span>
             <span class="skill-note">Prediction and segmentation where the data supports it</span>
-            <span class="tag is-core">Core</span>
+            <span class="tag is-data">Core</span>
           </div>
           <div class="skill">
             <span class="skill-name">Web Development</span>
             <span class="skill-note">Building the interface around the analysis</span>
-            <span class="tag is-core">Core</span>
+            <span class="tag is-data">Core</span>
           </div>
           <div class="skill">
             <span class="skill-name">AI Engineering</span>
@@ -652,16 +677,16 @@ footer {
         </div>
 
         <div class="group">
-          <p class="group-name">Commercial</p>
+          <p class="group-name is-biz">Commercial</p>
           <div class="skill">
             <span class="skill-name">Business Development</span>
             <span class="skill-note">Finding and qualifying where the value actually is</span>
-            <span class="tag is-core">Core</span>
+            <span class="tag is-biz">Core</span>
           </div>
           <div class="skill">
             <span class="skill-name">Sales</span>
             <span class="skill-note">Client conversations, pipeline, and closing</span>
-            <span class="tag is-core">Core</span>
+            <span class="tag is-biz">Core</span>
           </div>
         </div>
       </div>
@@ -886,6 +911,156 @@ footer {
   reduce.addEventListener("change", start);
 
   start();
+
+  /* ---------- Cherry blossom ------------------------------------
+     Petals fall, sway, and turn edge-on as they flutter. They shy
+     away from the cursor, and a click shakes a few loose. Motion is
+     the whole point of them, so under reduced-motion there are none. */
+  var pCanvas = document.getElementById("petals");
+  var pCtx = pCanvas.getContext("2d");
+  var pw = 0, ph = 0;
+  var petals = [];
+  var mouse = { x: -999, y: -999 };
+  var pRaf = null, last = 0;
+
+  function resolveRGB(token) {
+    probe.style.color = getComputedStyle(root).getPropertyValue(token).trim() || "#fff";
+    var m = getComputedStyle(probe).color.match(/\d+(\.\d+)?/g);
+    return m ? [ +m[0], +m[1], +m[2] ] : [ 233, 166, 182 ];
+  }
+
+  var petalTints = [ resolveRGB("--sakura"), resolveRGB("--sakura-deep") ];
+
+  function refreshTints() { petalTints = [ resolveRGB("--sakura"), resolveRGB("--sakura-deep") ]; }
+
+  function makePetal(x, y, burst) {
+    var size = 4.5 + Math.random() * 6.5;
+    return {
+      x: x != null ? x : Math.random() * pw,
+      // Seeded petals spread over the viewport so the page opens mid-fall;
+      // respawns come in above the top edge.
+      y: y != null ? y : Math.random() * ph,
+      s: size,
+      // bigger petals read as nearer: they fall faster and sit more opaque
+      fall: 11 + size * 3.4,
+      sway: 14 + Math.random() * 26,
+      swayF: 0.4 + Math.random() * 0.5,
+      rot: Math.random() * Math.PI * 2,
+      rotV: (Math.random() - 0.5) * 0.9,
+      flutF: 0.7 + Math.random() * 0.9,
+      phase: Math.random() * Math.PI * 2,
+      alpha: 0.30 + (size / 11) * 0.28,
+      tint: Math.random() < 0.35 ? 1 : 0,
+      vx: burst ? (Math.random() - 0.5) * 260 : 0,
+      vy: burst ? -40 - Math.random() * 130 : 0
+    };
+  }
+
+  function seedPetals() {
+    var target = Math.max(9, Math.min(20, Math.round(pw / 78)));
+    petals = [];
+    for (var i = 0; i < target; i++) petals.push(makePetal());
+  }
+
+  function petalPath(c, s) {
+    c.beginPath();
+    c.moveTo(0, -s);
+    c.bezierCurveTo(s * 0.90, -s * 0.35, s * 0.55, s * 0.70, s * 0.14, s * 0.92);
+    c.quadraticCurveTo(0, s * 0.70, -s * 0.14, s * 0.92);   // the notch in the tip
+    c.bezierCurveTo(-s * 0.55, s * 0.70, -s * 0.90, -s * 0.35, 0, -s);
+    c.closePath();
+  }
+
+  function stepPetals(ts) {
+    var dt = last ? Math.min((ts - last) / 1000, 0.05) : 0.016;
+    last = ts;
+    var t = ts / 1000;
+
+    pCtx.clearRect(0, 0, pw, ph);
+
+    for (var i = 0; i < petals.length; i++) {
+      var p = petals[i];
+
+      // Shy away from the cursor, falling off with distance.
+      var dx = p.x - mouse.x, dy = p.y - mouse.y;
+      var d2 = dx * dx + dy * dy;
+      if (d2 < 19600) {                      // 140px radius
+        var d = Math.sqrt(d2) || 1;
+        var push = (1 - d / 140) * 340;
+        p.vx += (dx / d) * push * dt;
+        p.vy += (dy / d) * push * dt;
+      }
+
+      p.vx *= 0.94;
+      p.vy *= 0.94;
+
+      p.x += (Math.sin(t * p.swayF + p.phase) * p.sway + p.vx) * dt;
+      p.y += (p.fall + p.vy) * dt;
+      p.rot += p.rotV * dt;
+
+      if (p.y > ph + 24) { petals[i] = makePetal(Math.random() * pw, -24); continue; }
+      if (p.y < -140) p.y = -24;
+      if (p.x < -40) p.x = pw + 30;
+      if (p.x > pw + 40) p.x = -30;
+
+      var c = petalTints[p.tint];
+      var flut = Math.cos(t * p.flutF + p.phase);
+
+      pCtx.save();
+      pCtx.translate(p.x, p.y);
+      pCtx.rotate(p.rot);
+      pCtx.scale(flut, 1);                   // turns edge-on and back
+      pCtx.fillStyle = "rgba(" + c[0] + "," + c[1] + "," + c[2] + "," + p.alpha + ")";
+      petalPath(pCtx, p.s);
+      pCtx.fill();
+      pCtx.restore();
+    }
+
+    pRaf = requestAnimationFrame(stepPetals);
+  }
+
+  function petalResize() {
+    pw = pCanvas.clientWidth;
+    ph = pCanvas.clientHeight;
+    pCanvas.width = Math.round(pw * dpr);
+    pCanvas.height = Math.round(ph * dpr);
+    pCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function petalStart() {
+    cancelAnimationFrame(pRaf);
+    pRaf = null;
+    petalResize();
+    if (reduce.matches) { pCtx.clearRect(0, 0, pw, ph); petals = []; return; }
+    seedPetals();
+    last = 0;
+    pRaf = requestAnimationFrame(stepPetals);
+  }
+
+  window.addEventListener("resize", function () {
+    var had = petals.length;
+    petalResize();
+    if (!reduce.matches && !had) petalStart();
+  }, { passive: true });
+
+  window.addEventListener("pointermove", function (e) {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+  }, { passive: true });
+
+  window.addEventListener("pointerleave", function () { mouse.x = mouse.y = -999; }, { passive: true });
+
+  // A click shakes a few loose, then the drift carries them off.
+  window.addEventListener("pointerdown", function (e) {
+    if (reduce.matches || petals.length > 46) return;
+    for (var i = 0; i < 5; i++) petals.push(makePetal(e.clientX, e.clientY, true));
+  }, { passive: true });
+
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", refreshTints);
+  new MutationObserver(refreshTints).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+  reduce.addEventListener("change", petalStart);
+
+  petalStart();
 })();
 </script>
 
